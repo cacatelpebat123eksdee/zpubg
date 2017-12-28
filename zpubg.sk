@@ -1,0 +1,518 @@
+#zpubg pentru original.
+#made by zs
+
+options:
+	version: 1.0bz22
+	world: world
+
+#======================================================================#
+#COMENZI (/ZPUBG)#
+#======================================================================#
+
+command /zpubg [<text>] [<text>] [<number>]:
+	aliases: /zpbg, /pubg
+	usage: /zpubg 
+	trigger:
+		if arg-1 is not set:
+			make player execute command "/zpubg info"
+		if arg-1 is "info":
+			message "&3&m---*---------------------*---"
+			message "       &b&lZPUBG &8- &f&ov1.0 by ZSERIFAN"
+			message ""
+			message "  &3* &fVersiune: &b{@version}"
+			message "  &3* &fCreator: &bZSERIFAN"
+			message "  &3* &fRaporteaza orice bug intampinat!"
+			message "  &3* &fComanda generala: &b/zpubg help"
+			message ""
+			message "&3&m---*---------------------*---"
+			if arg-2 is "arme":
+				message "&3&m---*---------------------*---"
+				message "       &b&lZPUBG &8- &f&oArme"
+				message ""
+				message "&3* &fPistoale: &bP18C&f, &bP92&f, &bP1911&f, &bR1895"
+				message "&3* &fSubmachine Guns: &bMicro UZI&f, &bUMP-9&f, &bKriss Vector&f, &bTommy Gun"
+				message "&3* &fShotguns: &bS1897&f, &bS686&f, &bS12K"
+				message "&3* &fAssault Rifles: &bM16A4&f, &bM416&f, &bAK-47&f, &bSCAR-L&f, &bGroza"
+				message "&3* &fDMRs: &bSKS&f, &bMk-14"
+				message "&3* &fSniper Rifles: &bKar 98 Kurtz&f, &bM24&f, &bAWM"
+				message "&3* &fMelee: &bTigaie Dry Cooker&f, &bRanga&f, &bSabie&f, &bCoasa"
+				message "&3* &fGrenade: &bFrag Grenade&f, &bSmoke Grenade&f, &bFlashbang&f, &bCocktail Molotov"
+				message ""
+				message "&3&m---*---------------------*---"
+		if arg-1 is "createarena":
+			if player has permission "zpubg.createarena":
+				if arg-2 is set:
+					if {zpubg.arena.%arg-2%} is not set:
+						message "&bZPUBG &8➫ &fArena %arg-2% se creaza, te rog sa astepti."
+						make console execute command "/mv create %arg-2% normal -t flat"
+						set {zpubg.arena.%arg-2%} to true
+						set {zpubg.status.%arg-2%} to "&6Not Ready"
+						set {zpubg.countdown-started.%arg-2%} to false
+						set {zpubg.players.%arg-2%} to "0" parsed as integer
+						add arg-2 to {arenas::*}
+						wait 1 second
+						message "&bZPUBG &8➫ &fArena a fost setata cu succes! Te teleportez catre ea..."
+						wait 1 second
+						make console execute command "/mv tp %player% %arg-2%"
+						message "&bZPUBG &8➫ &fAi fost teleportat la arena. Poti seta harta din worlds."
+					else:
+						message "&bZPUBG &8➫ &fAceasta arena exista deja si nu a putut fi setata."
+		if arg-1 is "deletearena":
+			if player has permission "zpubg.deletearena":
+				if arg-2 is set:
+					if {zpubg.arena.%arg-2%} is not set:
+						send "&bZPUBG &8➫ &fArena respectiva nu exista, te rog sa mai verifici odata argumentele."
+					else:
+						delete {zpubg.arena.%arg-2%}
+						delete {zpubg.status.%arg-2%}
+						delete {zpubg.countdown-started.%arg-2%}
+						delete {spawnpoints.%arg-2%::*}
+						remove arg-2 from {arenas::*}
+						make console execute command "/mv delete %arg-2%"
+						make console execute command "/mvconfirm"
+						message "&bZPUBG &8➫ &fArena a fost stearsa."
+		if arg-1 is "listarenas":
+			if size of {arenas::*} is 0:
+				send "&bZPUBG &8➫ &fNu exista nicio arena setata!"
+			else:
+				send "&3&m---*---------------------*---"
+				send "               &b&lZPUBG &8- &f&oArene"
+				loop {arenas::*}:
+					send "      &3* &f%loop-value%     &8-    %{zpubg.status.%loop-value%}%"
+				send ""
+				send "&3&m---*---------------------*---" 
+		if arg-1 is "setlobby":
+			if player has permission "zpubg.setarenalobby":
+				if arg-2 is set:
+					if {zpubg.arena.%arg-2%} is not set:
+						send "&bZPUBG &8➫ &fArena specificata nu exista."
+					else:
+						if {zpubg.status.%arg-2%} is "&6Not Ready" or "&aWaiting":
+							set {zpubg.gamelobby.%arg-2%} to location of player
+							send "&bZPUBG &8➫ &fGame Lobby-ul arenei %arg-2% a fost setat la coordonatele: &e%location of player%&f."
+						else:
+							message "&bZPUBG &8➫ &fArena respectiva are deja un lobby setat, te rog sa folosesti /zpubg edit %arg-2% pentru a o edita!"
+				else:
+					send "&bZPUBG &8➫ &fTe rog sa specifici o arena."
+			else:
+				send "&bZPUBG &8➫ &fNu ai permisiunea necesara pentru a executa aceasta comanda."
+		if arg-1 is "setpos1":
+			if player has permission "zpubg.setpos1":
+				if arg-2 is set:
+					if {zpubg.arena.%arg-2%} is set:
+						set {zpubg.pos1.%arg-2%} to location of player
+						send "&bZPUBG &8➫ &fPozitia 1 a fost setata la locatia: &e%location of player%&f."
+					else:
+						send "&bZPUBG &8➫ &fArena respectiva nu exista."
+				else:
+					send "&bZPUBG &8➫ &fSpecifica o arena."
+			else:
+				send "&bZPUBG &8➫ &fNu ai permisiunea necesara."
+		if arg-1 is "setpos2":
+			if player has permission "zpubg.setpos2":
+				if arg-2 is set:
+					if {zpubg.arena.%arg-2%} is set:
+						set {zpubg.pos2.%arg-2%} to location of player
+						send "&bZPUBG &8➫ &fPozitia 2 a fost setata la locatia: &e%location of player%&f."
+					else:
+						send "&bZPUBG &8➫ &fArena respectiva nu exista."
+				else:
+					send "&bZPUBG &8➫ &fSpecifica o arena."
+			else:
+				send "&bZPUBG &8➫ &fNu ai permisiunea necesara."
+		if arg-1 is "setspawnpoint":
+			if player has permission "zpubg.setspawnpoint":
+				if arg-2 is set:
+					if {zpubg.arena.%arg-2%} is set:
+						set {_n} to size of {spawnpoints.%arg-2%::*}
+						if {_n} > 31:
+							send "&bZPUBG &8➫ &fAi setat 32 de spawnpointuri, nu poti seta mai mult. Nu uita sa folosesti /zpubg setpos1 & /zpubg setpos2 si sa dai save arenei folosind comanda &e/zpubg savearena %arg-2%&f!"
+							stop trigger
+						set {zpubg.spawnpoint-%{_n}%.%arg-2%} to location of player
+						add location of player to {spawnpoints.%arg-2%::*}
+						send "&bZPUBG &8➫ &fSpawnpoint-ul %size of {spawnpoints.%arg-2%::*}% a fost setat la locatia: &e%location of player%&f."
+					else:
+						send "&bZPUBG &8➫ &fArena respectiva nu exista."
+				else:
+					send "&bZPUBG &8➫ &fSpecifica o arena."
+			else:
+				send "&bZPUBG &8➫ &fNu ai permisiunea necesara pentru a executa aceasta comanda."
+		if arg-1 is "savearena":
+			if arg-2 is set:
+				if player has permission "zpubg.savearena":
+					if {zpubg.arena.%arg-2%} is set:
+						if {zpubg.status.%arg-2%} is "&6Not Ready" or "&aWaiting":
+							if {zpubg.gamelobby.%arg-2%} is set:
+								if size of {spawnpoints.%arg-2%::*} is 32:
+									if {zpubg.pos1.%arg-2%} is set:
+										if {zpubg.pos2.%arg-2%} is set:
+											send "&bZPUBG &8➫ &fToate block-uri vor fi salvate in momentul de fata, te rog sa astepti."
+											make console execute command "/mv tp %player% world"
+											set {_lag} to 0
+											set {zpubg.total.%arg-2%} to 0
+											wait 10 ticks
+											loop blocks within {zpubg.pos1.%arg-2%} to {zpubg.pos2.%arg-2%}:
+												if loop-block is not air:
+													add 1 to {zpubg.total.%arg-2%}
+											loop blocks within {zpubg.pos1.%arg-2%} to {zpubg.pos2.%arg-2%}:
+												if loop-block is not air:
+													add 1 to {_blocks}
+													add 1 to {_lag}
+													set action bar of player to "&bZPUBG &8➫ &fBlockurile se salveaza. (&3%{_blocks}%&b/&3%{zpubg.total.%arg-2%}%&f)"
+													if {_lag} = 5000:
+														set {_lag} to 0
+														wait 2 seconds
+											set {zpubg.status.%arg-2%} to "&aWaiting"
+											send "&bZPUBG &8➫ &fArena a fost salvata cu succes."
+										else:
+											send "&bZPUBG &8➫ &fPozitia numarul 2 a arenei nu a fost setata. (&e/zpubg setpos2 %arg-2%&f)"
+									else:
+										send "&bZPUBG &8➫ &fPozitia numarul 1 a arenei nu a fost setata. (&e/zpubg setpos1 %arg-2%&f)"
+								else:
+									send "&bZPUBG &8➫ &fNu ai setat 32 de spawnpointuri ale arenei."
+							else:
+								send "&bZPUBG &8➫ &fNu ai setat Game Lobby-ul arenei!"
+						else:
+							send "&bZPUBG &8➫ &fAceasta arena a fost deja setata. Daca doresti sa o editezi, foloseste /zpubg edit %arg-2%. Daca doresti sa o stergi, foloseste /zpubg deletearena %arg-2%."
+					else:
+						send "&bZPUBG &8➫ &fSpecifica o arena!"
+				else:
+					send "&bZPUBG &8➫ &fNu ai permisiunea necesara pentru a face acest lucru!"
+			else:
+				send "&bZPUBG &8➫ &fSpecifica o arena!"
+		if arg-1 is "editarena":
+			if arg-2 is set:
+				if player has permission "zpubg.editarena":
+					if {zpubg.arena.%arg-2%} is set:
+						send "&bZPUBG &8➫ &fAsteapta o secunda."
+						wait 1 second
+						set {arenaname.%player%} to arg-2
+						clear player's inventory
+						set slot 0 of player's inventory to 1 lever named "&b&lZPUBG &8⏐ &fSet Spawnpoint"
+						set slot 1 of player's inventory to 1 lever named "&b&lZPUBG &8⏐ &fSet Game Lobby"
+						set slot 3 of player's inventory to 1 lever named "&b&lZPUBG &8⏐ &fSet Pos 1"
+						set slot 5 of player's inventory to 1 lever named "&b&lZPUBG &8⏐ &fSet Pos 2"
+						set slot 6 of player's inventory to 1 lever named "&b&lZPUBG &8⏐ &fDelete Spawnpoint"
+						set slot 7 of player's inventory to 1 paper named "&b&lZPUBG &8⏐ &fDisplay Arena Info"
+						set slot 8 of player's inventory to 1 wool named "&b&lZPUBG &8⏐ &fTermina"
+						set {inedit.%player%} to true
+						make player execute command "/mv tp %arg-2%"
+						make player execute command "/mvconfirm"
+						make player execute command "/gamemode 1"
+					else:
+						send "&bZPUBG &8➫ &fArena specificata nu exista."
+				else:
+					send "&bZPUBG &8➫ &fNu ai permisiunea necesara pentru a face acest lucru!"
+			else:
+				send "&bZPUBG &8➫ &fSpecifica o arena!"
+		if arg-1 is "arenainfo":
+			if arg-2 is set:
+				if {zpubg.arena.%arg-2%} is set:
+					send "&3&m---*---------------------*---"
+					send "&b&lZPUBG &8- &fInformatii Arena %arg-2%"
+					send ""
+					send "&3* &fNume: %arg-2%"
+					send "&3* &fStatus: %{zpubg.status.%arg-2%}%"
+					send "&3* &fPositie 1: %{zpubg.pos1.%arg-2%}%"
+					send "&3* &fPositie 2: %{zpubg.pos2.%arg-2%}%"
+					send "&3* &fLobby: %{zpubg.gamelobby.%arg-2%}%"
+					send "&3* &fSpawnpoints: %size of {spawnpoints.%arg-2%::*}%"
+					send ""
+					send "&3&m---*---------------------*---"
+				else:
+					send "&bZPUBG &8➫ &fArena respectiva nu exista."
+			else:
+				send "&bZPUBG &8➫ &fSpecifica o arena!"
+		if arg-1 is "deletespawnpoint":
+			if arg-2 is set:
+				if {zpubg.arena.%arg-2%} is set:
+					if size of {spawnpoints.%arg-2%::*} is 0:
+						send "&bZPUBG &8➫ &fAceasta arena nu are niciun spawnpoint setat."
+						stop trigger
+					set {_e} to random element of {spawnpoints.%arg-2%::*}
+					remove {_e} from {spawnpoints.%arg-2%::*}
+					send "&bZPUBG &8➫ &fLocatia (&e%{_e}%&f) a fost stearsa din lista de spawnpoint-uri! Locatii ramase: %size of {spawnpoints.%arg-2%::*}%"
+				else:
+					send "&bZPUBG &8➫ &fArena respectiva nu exista!"
+			else:
+				send "&bZPUBG &8➫ &fTrebuie sa specifici o arena!"
+		if arg-1 is "join":
+			if arg-2 is set:
+				if {ingame.%player%} is false:
+					if {zpubg.arena.%arg-2%} is set:
+						if {zpubg.status.%arg-2%} is "&aWaiting" or "&eStarting":
+							if {zpubg.players.%arg-2%} < 32:
+								set {zpubg.playing-arena.%player%} to arg-2
+								set {no-damage.%player%} to true
+								wipe player's sidebar
+								set {inwaiting.%player%} to true
+								set {inlobby.%player%} to false
+								clear player's inventory
+								wait 1 tick
+								set slot 8 of player to red glass pane named "&b&lZPUBG &8⏐ &fLeave Arena"
+								add player to {zpubg.playing.%arg-2%::*}
+								add 1 to {zpubg.players.%arg-2%}
+								teleport player to {zpubg.gamelobby.%arg-2%}
+								loop {zpubg.playing.%arg-2%::*}:
+									send "&bZPUBG &8➫ &f%player% a intrat in arena! (%{zpubg.players.%arg-2%}%/32)" to loop-value
+								send "&bZPUBG &8➫ &fAi intrat in arena!"
+								if {zpubg.players.%arg-2%} > 1:
+									if {zpubg.players.%arg-2%} < 3:
+										set {zpubg.status.%arg-2%} to "&eStarting"
+										set {timer.%arg-2%} to "Just Started"
+										set {secunde.%arg-2%} to "60" parsed as integer
+										loop {zpubg.playing.%arg-2%::*}:
+											set {incountdown.%loop-value%} to true
+											send "&bZPUBG &8➫ &fCountdown-ul a inceput!" to loop-value
+		if arg-1 is "leave":
+			if arg-2 is set:
+				if {inwaiting.%player%} is true:
+					if {zpubg.arena.%arg-2%} is set:
+						if {zpubg.playing-arena.%player%} is arg-2:
+							clear {zpubg.playing-arena.%player%}
+							set {no-damage.%player%} to false
+							wipe player's sidebar
+							set {inwaiting.%player%} to false
+							set {inlobby.%player%} to true
+							remove player from {zpubg.playing.%arg-2%::*}
+							remove 1 from {zpubg.players.%arg-2%}
+							clear player's inventory
+							make console execute command "/mv tp %player% world"
+							loop {zpubg.playing.%arg-2%::*}:
+								send "&bZPUBG &8➫ &f%player% a iesit din arena! (%{zpubg.players.%arg-2%}%/32)" to loop-value
+							send "&bZPUBG &8➫ &fAi iesit din arena!"
+							clear {incountdown.%arg-2%}
+							set {incountdown.%player%} to false
+							if {timer.%arg-2%} is true:
+								if {zpubg.players.%arg-2%} < 2:
+									set {timer.%arg-2%} to false
+									clear {secunde.%arg-2%}
+									set {zpubg.status.%arg-2%} to "&aWaiting"
+									loop {zpubg.playing.%arg-2%::*}:
+										send "&bZPUBG &8➫ &fCountdown-ul a fost oprit." to loop-value
+										set {incountdown.%loop-value%} to false
+
+
+#=======================================#
+# SIGN CLICK EVENTS #
+#=======================================#
+
+on rightclick on sign:
+	if line 1 is "&b&lZPUBG &8⏐ &3Original":
+		make player execute command "/zpubg join %uncolored line 2%"
+
+
+on sign change:
+	if player has permission "zpubg.signcreate":
+		if line 1 is "[zpubg]":
+			if line 2 is "join" or "Join":
+				if {zpubg.arena.%uncolored line 3%} is set:
+					set line 1 to "&b&lZPUBG &8⏐ &3Original"
+					set line 2 to "&3%uncolored line 3%"
+					set line 3 to "&7Loading status..."
+					set line 4 to "&7Loading players..."
+					if block 1 behind the block at event-block is not air:
+						set block 1 behind the block at event-block to "95:0" parsed as item
+					set {zpubg.sign-loc::%location of event-block%} to location of event-block
+				else:
+					set line 1 to "&b&lZPUBG &8⏐ &3Original"
+					set line 2 to "&c&lEROARE"
+					set line 3 to "Aceasta arena nu"
+					set line 4 to "exista!"
+					wait 3 seconds
+					set event-block to air
+
+every 5 seconds:
+	if {zpubg.sign-loc::*} is set:
+		loop {zpubg.sign-loc::*}:
+			set {_block} to block at {zpubg.sign-loc::%loop-value%}
+			if "%{_block}%" is not "sign" or "wall sign":
+				set {_loc} to location of {_block}
+				set block at {_loc} to air
+				send "&bZPUBG &8➫ &fSign from %{_loc}% removed!" to console
+				delete {zpubg.sign-loc::%loop-value%}
+				remove loop-value from {zpubg.sign-loc::*}
+			else:
+				set {_arena.sign} to uncolored line 2 of {_block}
+				set line 3 of {_block} to "%{zpubg.status.%{_arena.sign}%}%"
+				set line 4 of {_block} to "&b%{zpubg.players.%{_arena.sign}%}%&8/&b32"
+
+#===============================#
+# LISTENERS FOR JOIN/LEAVE      #
+#===============================#
+every 1 second:
+	loop {arenas::*}:
+		if {timer.%loop-value%} is "Just Started":
+			set {timer.%loop-value%} to true
+			remove 1 from {secunde.%loop-value%}
+		else if {timer.%loop-value%} is true:
+			remove 1 from {secunde.%loop-value%}
+		else if {timer.%loop-value%} is true:
+			if {secunde.%loop-value%} < 0:
+				set {zpubg.status.%loop-value%} to "&cIn-Game"
+				clear {secunde.%loop-value%}
+				loop {spawnpoints.%loop-value%::*}:
+					add loop-value-2 to {spawnpoainte.%loop-value-1%::*}
+				loop {zpubg.players.%loop-value%::*}:
+					send "&bZPUBG &8➫ &fFoloseste parasuta in momentul in care esti in aer pentru a putea zbura!" to loop-value-2
+					set {_loc} to random element of {spawnpoainte.%loop-value%::*}
+					make console execute command "/parachute %loop-value-2%"
+					teleport loop-value-2 to {_loc}
+					send "&bZPUBG &8➫ &fSucces!" to loop-value-2
+
+
+#=====#
+#ON SOMETHING EVENTS#
+#=====#
+
+on damage:
+	if {zpubg.no-damage.%victim%} is true:
+		cancel event
+
+on damage:
+	if victim is chicken:
+		cancel event
+
+on drop:
+	if {inedit.%player%} is true:
+		cancel event
+
+on damage:
+	if attacker is water and void and suffocation:
+		cancel event
+
+on right click:
+	if player is holding 1 lever:
+		if name of held item is "&b&lZPUBG &8⏐ &fSet Game Lobby":
+			make player execute command "/zpubg setlobby %{arenaname.%player%}%"
+		if name of held item is "&b&lZPUBG &8⏐ &fSet Spawnpoint":
+			make player execute command "/zpubg setspawnpoint %{arenaname.%player%}%"
+		if name of held item is "&b&lZPUBG &8⏐ &fSet Pos 1":
+			make player execute command "/zpubg setpos1 %{arenaname.%player%}%"
+		if name of held item is "&b&lZPUBG &8⏐ &fSet Pos 2":
+			make player execute command "/zpubg setpos2 %{arenaname.%player%}%"
+		if name of held item is "&b&lZPUBG &8⏐ &fDelete Spawnpoint":
+			make player execute command "/zpubg deletespawnpoint %{arenaname.%player%}%"
+	if player is holding 1 paper:
+		if name of held item is "&b&lZPUBG &8⏐ &fDisplay Arena Info":
+			make player execute command "/zpubg arenainfo %{arenaname.%player%}%"
+	if player is holding 1 wool:
+		if name of held item is "&b&lZPUBG &8⏐ &fTermina":
+			make console execute command "/mv tp %player% world"
+			wait 1 second
+			set {inedit.%player%} to false
+			clear player's inventory
+			set player's gamemode to SURVIVAL
+			send "&bZPUBG &8➫ &fVom salva arena in 3 secunde."
+			wait 3 seconds
+			make player execute command "/zpubg savearena %{arenaname.%player%}%"
+			delete {arenaname.%player%}
+	if player is holding 1 golden hoe:
+		send "%location of player%"
+	if player is holding 1 red glass pane:
+		set {_arena} to {zpubg.playing-arena.%player%}
+		if name of held item is "&b&lZPUBG &8⏐ &fLeave Arena":
+			make player execute command "/zpubg leave %{_arena}%"
+
+
+#======================================================================#
+#ON JOIN/QUIT - LOBBY EVENTS#
+#======================================================================#
+
+on first join:
+	set {coins.%player%} to "0" parsed as integer
+	set {inlobby.%player%} to true
+	set {inwaiting.%player%} to false
+	set {ingame.%player%} to false
+	set {kdr-global.%player%} to "%{kills-global.%player%}%/%{deaths-global.%player%}%"
+	set {kills-global.%player%} to "0" parsed as integer
+	set {deaths-global.%player%} to "0" parsed as integer
+	set {wins.%player%} to "0" parsed as integer
+	set {hasjoinedbefore.%player%} to true
+
+on join:
+	if {hasjoinedbefore.%player%} is not set:
+		set {coins.%player%} to "0" parsed as integer
+		set {inwaiting.%player%} to false
+		set {ingame.%player%} to false
+		set {inlobby.%player%} to true
+		set {kdr-global.%player%} to "%{kills-global.%player%}%/%{deaths-global.%player%}%"
+		set {kills-global.%player%} to "0" parsed as integer
+		set {deaths-global.%player%} to "0" parsed as integer
+		set {wins.%player%} to "0" parsed as integer
+
+on join:
+	set {inlobby.%player%} to true
+	set {inwaiting.%player%} to false
+	set {ingame.%player%} to false
+
+on damage:
+	if victim's health is 0.5:
+		send "a" to victim
+
+on death:
+	set {justdied.%player%} to true
+
+on hunger bar change:
+	cancel event
+
+
+
+#======================================================================#
+#SCOREBOARD#
+#======================================================================#
+
+every 3 real seconds:
+	loop all players:
+		if {inlobby.%loop-player%} is true:
+			display board named "&3Original &8⎜ &b&lPUBG" to loop-player
+			move display of loop-player to sidebar
+			set score "&9 " in sidebar of loop-player to 10
+			set score "&3* &fTotal Deaths: &b%{deaths-global.%loop-player%}%" in sidebar of loop-player to 9
+			set score "&3* &fTotal Kills: &b%{kills-global.%loop-player%}%" in sidebar of loop-player to 8
+			set score "&3* &fKDR: &b%{kills-global.%loop-player%}%" in sidebar of loop-player to 7
+			set score "&7 " in sidebar of loop-player to 6
+			if {inedit.%loop-player%} is true:
+				set score "&3* &fStatus: &bEditing an Arena" in sidebar of loop-player to 5
+			else:
+				set score "&3* &fStatus: &bMain Lobby" in sidebar of loop-player to 5
+			set score "&3* &fCoins: &b%{coins.%loop-player%}% ⛃" in sidebar of loop-player to 4
+			set score "&3* &fNume: &b%loop-player%" in sidebar of loop-player to 3
+			set score "&d " in sidebar of loop-player to 2
+			set score "&b&lZPUBG &8⎜ &f&ov{@version}" in sidebar of loop-player to 1
+		if {inwaiting.%loop-player%} is true:
+			display board named "&3Original &8⎜ &b&lPUBG" to loop-player
+			move display of loop-player to sidebar
+			set score "&9 " in sidebar of loop-player to 10
+			set {_arena} to {zpubg.playing-arena.%loop-player%}
+			set score "&3* &fPlayers Alive: &b%{zpubg.players.%{_arena}%}%/32" in sidebar of loop-player to 9
+			set score "&3* &fKills: &b%{kills-global.%loop-player%}%" in sidebar of loop-player to 8
+			set score "&3* &fArena: &b%{zpubg.playing-arena.%loop-player%}%" in sidebar of loop-player to 7
+			set score "&7 " in sidebar of loop-player to 6
+			set score "&3* &fStatus: &bWaiting..." in sidebar of loop-player to 5
+			set score "&3* &fCoins: &b%{coins.%loop-player%}% ⛃" in sidebar of loop-player to 4
+			set score "&3* &fNume: &b%loop-player%" in sidebar of loop-player to 3
+			set score "&d " in sidebar of loop-player to 2
+			set score "&b&lZPUBG &8⎜ &f&ov{@version}" in sidebar of loop-player to 1
+		if {incountdown.%loop-player%} is true:
+			display board named "&3Original &8⎜ &b&lPUBG" to loop-player
+			move display of loop-player to sidebar
+			set score "&9 " in sidebar of loop-player to 10
+			set {_arena} to {zpubg.playing-arena.%loop-player%}
+			set score "&3* &fPlayers Alive: &b%{zpubg.players.%{_arena}%}%/32" in sidebar of loop-player to 9
+			set score "&3* &fKills: &b%{kills-global.%loop-player%}%" in sidebar of loop-player to 8
+			set score "&3* &fArena: &b%{_arena}%" in sidebar of loop-player to 7
+			set score "&7 " in sidebar of loop-player to 6
+			set score "&3* &fStatus: &bStarting..." in sidebar of loop-player to 5
+			set score "&3* &fCountdown: &b%{secunde.%{_arena}%}%s" in sidebar of loop-player to 4
+			set score "&3* &fNume: &b%loop-player%" in sidebar of loop-player to 3
+			set score "&d " in sidebar of loop-player to 2
+			set score "&b&lZPUBG &8⎜ &f&ov{@version}" in sidebar of loop-player to 1
+
+#======================================================================#
+#TAB SHIT#
+#======================================================================#
+
+on join:
+	set tab header to "%nl%&3Original &8⎜ &b&lPUBG%nl%&fTe joci pe sectiunea &b&lPUBG &fa server-ului Original!%nl%%nl%" and footer to "%nl%&3Donatii &8⎜ &foriginal.minecraftmarket.com%nl%%nl%" for player
+
